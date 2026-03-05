@@ -8,9 +8,10 @@ A high-performance predictive modeling dashboard built with React and Vite. Feat
 - **Navigation:** Implemented a 3-button dashboard (Train, Run, Optimize).
 - **Atlas Data Optimizer:** Fully functional CSV cleaning tool (trims whitespace, removes empty rows).
 - **Footer:** Added attribution for Tanishq, Sanika Sadre, AIDS 3rd Year, and C2P2 Initiative.
+- **Migration:** Successfully migrated from Replit Agent to Replit. Fixed invalid `database` icon import from lucide-react.
 
 ## Tech Stack
-- **Frontend:** React 18, Vite 7
+- **Frontend:** React 19, Vite 7
 - **Styling:** Tailwind CSS 4 with `@tailwindcss/postcss`
 - **Animations:** Framer Motion
 - **Icons:** Lucide React
@@ -26,9 +27,15 @@ src/
 public/
   assets/
     background.jpg  — Cinematic Background
-vite.config.js      — Port 5000 / allowedHosts
+vite.config.js      — Port 5000 / allowedHosts: true
 postcss.config.js   — Tailwind v4 PostCSS
 package.json        — Dependencies
+```
+
+## Run Command
+The app runs via Vite dev server on port 5000:
+```
+npm install && npx vite --host 0.0.0.0 --port 5000
 ```
 
 ## Credits

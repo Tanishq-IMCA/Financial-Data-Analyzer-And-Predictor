@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import Papa from 'papaparse';
-import { Upload, Trash2, Download, CheckCircle2, Loader2, FileSpreadsheet, BrainCircuit, PlayCircle, database, ChevronLeft } from 'lucide-react';
+import { Upload, Trash2, Download, CheckCircle2, Loader2, FileSpreadsheet, BrainCircuit, PlayCircle, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const GlassCard = ({ children, className = "" }) => (
