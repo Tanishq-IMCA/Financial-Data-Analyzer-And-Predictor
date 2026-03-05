@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import Papa from 'papaparse';
-import { Upload, Trash2, Download, CheckCircle2, Loader2, FileSpreadsheet, BrainCircuit, PlayCircle, ChevronLeft } from 'lucide-react';
+import { Upload, Trash2, Download, CheckCircle2, Loader2, FileSpreadsheet, BrainCircuit, PlayCircle, ChevronLeft, Check, X, Columns } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const GlassCard = ({ children, className = "" }) => (
@@ -12,7 +12,10 @@ const GlassCard = ({ children, className = "" }) => (
 export default function App() {
   const [view, setView] = useState('menu'); // 'menu', 'optimizer'
   const [file, setFile] = useState(null);
-  const [data, setData] = useState(null);
+  const [rawData, setRawData] = useState([]);
+  const [selectedRows, setSelectedRows] = useState(new Set());
+  const [columnLimit, setColumnLimit] = useState(0);
+  const [headers, setHeaders] = useState([]);
   const [cleaning, setCleaning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [cleaned, setCleaned] = useState(false);
@@ -24,8 +27,14 @@ export default function App() {
       setFile(uploadedFile);
       Papa.parse(uploadedFile, {
         header: true,
+        skipEmptyLines: 'greedy',
         complete: (results) => {
-          setData(results.data);
+          setRawData(results.data);
+          const cols = results.meta.fields || [];
+          setHeaders(cols);
+          setColumnLimit(cols.length);
+          // Auto-select all rows by default
+          setSelectedRows(new Set(results.data.map((_, i) => i)));
           setCleaned(false);
           setProgress(0);
         }
@@ -33,37 +42,57 @@ export default function App() {
     }
   };
 
-  const cleanData = async () => {
+  const toggleRow = (index) => {
+    const newSelected = new Set(selectedRows);
+    if (newSelected.has(index)) {
+      newSelected.delete(index);
+    } else {
+      newSelected.add(index);
+    }
+    setSelectedRows(newSelected);
+  };
+
+  const toggleAll = () => {
+    if (selectedRows.size === rawData.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(rawData.map((_, i) => i)));
+    }
+  };
+
+  const processData = async () => {
     setCleaning(true);
     setProgress(0);
     
-    for (let i = 0; i <= 100; i += 10) {
+    for (let i = 0; i <= 100; i += 20) {
       setProgress(i);
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    const cleanedData = data.filter(row => {
-      return Object.values(row).some(val => val && val.toString().trim() !== "");
-    }).map(row => {
+    const filteredRows = rawData.filter((_, i) => selectedRows.has(i));
+    const limitedHeaders = headers.slice(0, columnLimit);
+    
+    const finalData = filteredRows.map(row => {
       const newRow = {};
-      Object.keys(row).forEach(key => {
-        newRow[key] = row[key] ? row[key].toString().trim() : "";
+      limitedHeaders.forEach(header => {
+        newRow[header] = row[header];
       });
       return newRow;
     });
 
-    setData(cleanedData);
+    setRawData(finalData);
+    setHeaders(limitedHeaders);
     setCleaning(false);
     setCleaned(true);
   };
 
   const downloadFile = () => {
-    const csv = Papa.unparse(data);
+    const csv = Papa.unparse(rawData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `cleaned_${file.name}`);
+    link.setAttribute('download', `refined_${file.name}`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -79,7 +108,7 @@ export default function App() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-4xl z-10"
+        className="w-full max-w-5xl z-10"
       >
         <header className="text-center mb-12 space-y-4">
           <motion.h1 
@@ -135,7 +164,7 @@ export default function App() {
                     <FileSpreadsheet className="w-8 h-8 text-emerald-300" />
                   </div>
                   <h3 className="text-xl font-bold">Atlas Data Optimizer</h3>
-                  <p className="text-white/50 text-sm leading-relaxed">Streamline and sanitize raw CSV data for optimal intake.</p>
+                  <p className="text-white/50 text-sm leading-relaxed">Streamline and refine raw CSV data for optimal intake.</p>
                   <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mt-auto group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">Launch Tool →</span>
                 </GlassCard>
               </button>
@@ -146,10 +175,10 @@ export default function App() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto w-full"
+              className="w-full"
             >
               <button 
-                onClick={() => { setView('menu'); setData(null); setFile(null); }}
+                onClick={() => { setView('menu'); setRawData([]); setFile(null); setCleaned(false); }}
                 className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition-colors group"
               >
                 <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -159,10 +188,10 @@ export default function App() {
               <GlassCard className="p-8 space-y-8">
                 <header className="text-center space-y-2">
                   <h2 className="text-3xl font-bold tracking-tight">Atlas Data Optimizer</h2>
-                  <p className="text-white/50 text-sm">Professional CSV Sanitization Utility</p>
+                  <p className="text-white/50 text-sm">Professional Data Refinement Utility</p>
                 </header>
 
-                {!data ? (
+                {rawData.length === 0 ? (
                   <div 
                     onClick={() => fileInputRef.current.click()}
                     className="group relative cursor-pointer"
@@ -183,28 +212,104 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-500/20 rounded-lg">
-                          <FileSpreadsheet className="w-6 h-6 text-emerald-300" />
+                    <div className="flex flex-col md:flex-row gap-6">
+                      {/* Left Side: Stats and Controls */}
+                      <div className="flex-1 space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-emerald-500/20 rounded-lg">
+                              <FileSpreadsheet className="w-6 h-6 text-emerald-300" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium truncate max-w-[200px]">{file.name}</p>
+                              <p className="text-white/50 text-xs">{rawData.length.toLocaleString()} rows detected</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => { setRawData([]); setFile(null); setCleaned(false); }}
+                            className="p-2 hover:bg-red-500/20 rounded-lg text-red-300 transition-colors"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
                         </div>
-                        <div>
-                          <p className="text-white font-medium truncate max-w-[200px]">{file.name}</p>
-                          <p className="text-white/50 text-xs">{data.length.toLocaleString()} rows detected</p>
-                        </div>
+
+                        {!cleaned && (
+                          <div className="space-y-6">
+                            <div className="space-y-4">
+                              <div className="flex justify-between items-end">
+                                <label className="text-xs font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2">
+                                  <Columns className="w-3 h-3" />
+                                  Column Retention
+                                </label>
+                                <span className="text-2xl font-black text-white">{columnLimit} <span className="text-xs font-medium text-white/30 uppercase tracking-tighter">Columns</span></span>
+                              </div>
+                              <input 
+                                type="range" 
+                                min="1" 
+                                max={headers.length} 
+                                value={columnLimit}
+                                onChange={(e) => setColumnLimit(parseInt(e.target.value))}
+                                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                              />
+                              <div className="flex flex-wrap gap-2 pt-2">
+                                {headers.map((h, i) => (
+                                  <span key={h} className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight transition-all duration-300 ${i < columnLimit ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/5 text-white/20 border border-white/5'}`}>
+                                    {h}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <button 
-                        onClick={() => { setData(null); setFile(null); setCleaned(false); }}
-                        className="p-2 hover:bg-red-500/20 rounded-lg text-red-300 transition-colors"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+
+                      {/* Right Side: Row Selector */}
+                      {!cleaned && (
+                        <div className="flex-1 space-y-4">
+                           <div className="flex justify-between items-center px-1">
+                            <label className="text-xs font-bold uppercase tracking-widest text-blue-400">Row Selection</label>
+                            <button 
+                              onClick={toggleAll}
+                              className="text-[10px] font-bold uppercase tracking-widest bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10 transition-colors"
+                            >
+                              {selectedRows.size === rawData.length ? 'Deselect All' : 'Select All'}
+                            </button>
+                          </div>
+                          <div className="h-64 overflow-y-auto bg-black/20 rounded-xl border border-white/10 custom-scrollbar pr-2">
+                            <div className="divide-y divide-white/5">
+                              {rawData.map((row, idx) => (
+                                <div 
+                                  key={idx}
+                                  onClick={() => toggleRow(idx)}
+                                  className="group flex items-center gap-4 p-3 hover:bg-white/5 cursor-pointer transition-colors"
+                                >
+                                  <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${selectedRows.has(idx) ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}`}>
+                                    {selectedRows.has(idx) && <Check className="w-3 h-3 text-white" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-mono text-white/30 mb-1">Row #{idx + 1}</p>
+                                    <p className="text-xs text-white/70 truncate">
+                                      {Object.values(row).slice(0, 3).join(' | ')}...
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-center text-white/30 uppercase tracking-[0.2em] font-bold">
+                            {selectedRows.size} of {rawData.length} rows selected
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {cleaning && (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="flex justify-between text-xs text-white/60 uppercase tracking-wider font-bold">
-                          <span>Optimizing...</span>
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Processing Engine Active...
+                          </span>
                           <span>{progress}%</span>
                         </div>
                         <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
@@ -220,14 +325,17 @@ export default function App() {
                     <div className="flex gap-4">
                       {!cleaned ? (
                         <button
-                          onClick={cleanData}
-                          disabled={cleaning}
-                          className="flex-1 py-4 bg-white text-slate-950 font-bold rounded-xl hover:bg-opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                          onClick={processData}
+                          disabled={cleaning || selectedRows.size === 0}
+                          className="flex-1 py-4 bg-white text-slate-950 font-bold rounded-xl hover:bg-opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group shadow-xl shadow-white/5"
                         >
                           {cleaning ? (
-                            <><Loader2 className="w-5 h-5 animate-spin" />Processing...</>
+                            <><Loader2 className="w-5 h-5 animate-spin" />Syncing Pipeline...</>
                           ) : (
-                            "Run Optimization"
+                            <>
+                              Refine Dataset
+                              <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            </>
                           )}
                         </button>
                       ) : (
@@ -236,19 +344,27 @@ export default function App() {
                           className="flex-1 py-4 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-400 transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
                         >
                           <Download className="w-5 h-5" />
-                          Download Optimized CSV
+                          Export Refined Data
                         </button>
                       )}
                     </div>
 
                     {cleaned && (
                       <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center justify-center gap-2 text-emerald-300 text-sm font-medium"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex flex-col items-center gap-4"
                       >
-                        <CheckCircle2 className="w-4 h-4" />
-                        Sanitization complete!
+                        <div className="flex items-center gap-2 text-emerald-300 text-sm font-bold uppercase tracking-widest bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20">
+                          <CheckCircle2 className="w-4 h-4" />
+                          Refinement Sequence Complete
+                        </div>
+                        <button 
+                          onClick={() => { setRawData([]); setFile(null); setCleaned(false); }}
+                          className="text-[10px] text-white/30 hover:text-white uppercase tracking-widest transition-colors"
+                        >
+                          Process Another Dataset
+                        </button>
                       </motion.div>
                     )}
                   </div>
@@ -257,6 +373,38 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <footer className="mt-20 flex flex-col items-center space-y-4">
+          <div className="flex items-center gap-4 text-white/20 text-[10px] tracking-[0.3em] uppercase font-bold text-center">
+            <div className="hidden md:block h-[1px] w-12 bg-white/10" />
+            Designed by Tanishq || Sanika Sadre || AIDS 3rd Year || C2P2 Initiative
+            <div className="hidden md:block h-[1px] w-12 bg-white/10" />
+          </div>
+          <p className="text-white/10 text-[9px] uppercase tracking-widest">
+            Flux Predictive © 2026 Advanced Forecasting Systems
+          </p>
+        </footer>
+      </motion.div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
+    </div>
+  );
+}
 
         <footer className="mt-20 flex flex-col items-center space-y-4">
           <div className="flex items-center gap-4 text-white/20 text-[10px] tracking-[0.3em] uppercase font-bold">
