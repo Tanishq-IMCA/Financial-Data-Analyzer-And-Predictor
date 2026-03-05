@@ -1,7 +1,13 @@
-# PMAF Tool — Predictive Modelling & Forecasting Intake
+# Flux Predictive — Advanced Forecasting Suite
 
 ## Overview
-A web-based data preparation utility built with React and Vite. Users can upload CSV files, clean the data (trim whitespace, remove empty rows), and export the cleaned CSV. Features a glassmorphic UI with animated gradient backgrounds.
+A high-performance predictive modeling dashboard built with React and Vite. Features a multi-module architecture including data optimization, model training, and execution interfaces.
+
+## Current State
+- **Branding:** Rebranded to "Flux Predictive".
+- **Navigation:** Implemented a 3-button dashboard (Train, Run, Optimize).
+- **Atlas Data Optimizer:** Fully functional CSV cleaning tool (trims whitespace, removes empty rows).
+- **Footer:** Added attribution for Tanishq, Sanika Sadre, AIDS 3rd Year, and C2P2 Initiative.
 
 ## Tech Stack
 - **Frontend:** React 18, Vite 7
@@ -12,24 +18,18 @@ A web-based data preparation utility built with React and Vite. Users can upload
 
 ## Project Structure
 ```
-index.html          — HTML entry point
+index.html          — Entry point
 src/
-  main.jsx          — React DOM mount
-  App.jsx           — Main application component
-  index.css         — Global styles (Tailwind v4 import)
+  main.jsx          — React Mount
+  App.jsx           — Dashboard Logic & Modules
+  index.css         — Global Styles
 public/
   assets/
-    background.jpg  — Background image
-vite.config.js      — Vite config (port 5000, allowedHosts: true)
-postcss.config.js   — PostCSS config using @tailwindcss/postcss
-tailwind.config.js  — Tailwind content paths
+    background.jpg  — Cinematic Background
+vite.config.js      — Port 5000 / allowedHosts
+postcss.config.js   — Tailwind v4 PostCSS
 package.json        — Dependencies
 ```
 
-## Development
-The app runs on port 5000 via the "Start application" workflow.
-
-## Replit Configuration Notes
-- Vite is configured with `host: '0.0.0.0'`, `port: 5000`, and `allowedHosts: true` for Replit proxy compatibility.
-- PostCSS uses `@tailwindcss/postcss` (required for Tailwind v4).
-- CSS entry uses `@import "tailwindcss"` (Tailwind v4 syntax).
+## Credits
+Designed by Tanishq || Sanika Sadre || AIDS 3rd Year || C2P2 Initiative

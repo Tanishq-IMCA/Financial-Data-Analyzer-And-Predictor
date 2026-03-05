@@ -1,33 +1,36 @@
-# PMAF: Predictive Modelling and Forecasting Tool
+# Flux Predictive: Advanced Modelling and Forecasting
 
 ## Project Overview
-This web application is designed for the **PMAF (Predictive Modelling and Forecasting)** subject, specifically focusing on intaking CSV data to predict **Purchase Probability** and **Future Spending**.
+Flux Predictive is a next-generation predictive modeling suite designed for the **PMAF (Predictive Modelling and Forecasting)** subject. It focuses on high-precision data sanitization and future-ready forecasting for **Purchase Probability** and **Future Spending**.
 
-The tool provides a streamlined, professional interface for data scientists and analysts to upload raw datasets, perform essential data cleaning, and prepare high-quality inputs for predictive models.
+## Core Modules
+- **Atlas Data Optimizer**: (Active) A professional CSV sanitization utility that streamlines raw data, trims whitespace, and removes invalid rows for optimal model intake.
+- **Model Training**: (Planned) Neural network training interface for custom predictive weights.
+- **Model Execution**: (Planned) Real-time execution of forecasting logic on processed datasets.
 
 ## Key Features
-- **CSV Data Intake**: Seamlessly upload CSV files for analysis.
-- **Data Validation**: Automatically detects the number of rows and identifies potential issues.
-- **Intelligent Cleaning**: 
-    - Remove empty spaces and null values.
-    - Handle invalid data formats.
-    - Real-time progress tracking with a visual progress bar.
-- **Glassmorphic UI**: A modern, "glassy" user interface built with advanced CSS techniques for a professional aesthetic, featuring a high-quality atmospheric background.
-- **Instant Export**: Download your cleaned dataset immediately after processing is complete.
+- **Streamlined Workflow**: Multi-module dashboard for complete data lifecycle management.
+- **Atlas Optimization**: 
+    - Real-time sanitization of CSV datasets.
+    - Progress visualization and automated quality checks.
+    - Instant export of optimized data.
+- **Elite UI/UX**: 
+    - "Flux" Branding with deep glassmorphism.
+    - High-fidelity atmospheric visuals and fluid Framer Motion animations.
+    - Responsive dashboard design.
 
-## Workflow
-1. **Upload**: Drop your `.csv` file into the upload zone.
-2. **Review**: See the total row count and data summary.
-3. **Clean**: Select cleaning options (e.g., "Trim Whitespace", "Remove Empty Rows") and initiate the process.
-4. **Monitor**: Watch the progress bar as the data is transformed.
-5. **Download**: Grab your refined CSV file, ready for forecasting models.
+## Technical Stack
+- **Engine**: React 18 + Vite 7
+- **Styling**: Tailwind CSS 4 + PostCSS
+- **Interactions**: Framer Motion
+- **Assets**: Lucide React
+- **Data Core**: PapaParse
 
-## Technical Architecture
-- **Frontend**: React + Vite
-- **Styling**: Tailwind CSS with Glassmorphism (backdrop-filter)
-- **Icons**: Lucide React
-- **Animations**: Framer Motion
-- **CSV Parsing**: PapaParse
+## Team & Credits
+- **Design & Architecture**: Tanishq
+- **Core Contributor**: Sanika Sadre
+- **Context**: AIDS 3rd Year
+- **Program**: C2P2 Initiative
 
 ---
-*Status: Initial documentation and UI structure complete. Awaiting user confirmation to proceed with advanced forecasting logic.*
+*Status: Dashboard and Atlas Data Optimizer (CSV Cleaning) modules are live. Model Training and Execution hooks are established.*
