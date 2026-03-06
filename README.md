@@ -62,7 +62,7 @@ This project relies on several key libraries:
 
 ## Team & Credits
 - **Design & Architecture**: Tanishq
-- **Core Contributor**: Sanika Sadre
+- **Core Contributor**: Tanishq Giri and Sanika Sadre
 - **Context**: AIDS 3rd Year
 - **Program**: C2P2 Initiative
 
