@@ -9,7 +9,7 @@ const GlassCard = ({ children, className = "" }) => (
   </div>
 );
 
-export default function App() {
+export default function make App() {
   const [view, setView] = useState('menu'); // 'menu', 'optimizer'
   const [file, setFile] = useState(null);
   const [rawData, setRawData] = useState([]);
