@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import Papa from 'papaparse';
-import { Upload, Trash2, Download, CheckCircle2, Loader2, FileSpreadsheet, BrainCircuit, PlayCircle, ChevronLeft, Check, X, Columns, SlidersHorizontal, AlertTriangle } from 'lucide-react';
+import { Upload, Trash2, Download, CheckCircle2, Loader2, FileSpreadsheet, BrainCircuit, PlayCircle, ChevronLeft, Check, X, Columns, SlidersHorizontal, AlertTriangle, Wand2, TrendingUp, TrendingDown, Shuffle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const GlassCard = ({ children, className = "" }) => (
@@ -27,6 +27,10 @@ export default function App() {
   ]);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // ID of model to confirm delete
   const [trainingConfig, setTrainingConfig] = useState({ type: 'Random Forest', target: '' });
+  
+  // Generator State
+  const [showGenerator, setShowGenerator] = useState(false);
+  const [genConfig, setGenConfig] = useState({ rows: 1000, mode: 'random' }); // 'random', 'ascending', 'descending'
 
   const fileInputRef = useRef(null);
 
@@ -50,6 +54,52 @@ export default function App() {
     }
   };
 
+  const generateData = () => {
+    const categories = [
+      { name: 'Food & Dining', min: 10, max: 150 },
+      { name: 'Transportation', min: 5, max: 50 },
+      { name: 'Shopping', min: 20, max: 500 },
+      { name: 'Entertainment', min: 15, max: 200 },
+      { name: 'Utilities', min: 50, max: 300 },
+      { name: 'Rent/Mortgage', min: 800, max: 2500 },
+      { name: 'Healthcare', min: 30, max: 1000 }
+    ];
+
+    const newData = [];
+    const startDate = new Date('2023-01-01');
+
+    for (let i = 0; i < genConfig.rows; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      
+      const category = categories[Math.floor(Math.random() * categories.length)];
+      let amount = Math.floor(Math.random() * (category.max - category.min + 1)) + category.min;
+
+      // Apply Trend Logic
+      if (genConfig.mode === 'ascending') {
+        amount = amount * (1 + (i / genConfig.rows)); // Increases up to 2x by end
+      } else if (genConfig.mode === 'descending') {
+        amount = amount * (2 - (i / genConfig.rows)); // Starts 2x, decreases to 1x
+      }
+
+      newData.push({
+        Date: date.toISOString().split('T')[0],
+        Category: category.name,
+        Amount: amount.toFixed(2),
+        Payment_Method: Math.random() > 0.6 ? 'Credit Card' : 'Debit Card',
+        Merchant: `Merchant_${Math.floor(Math.random() * 100)}`
+      });
+    }
+
+    setRawData(newData);
+    setHeaders(Object.keys(newData[0]));
+    setColumnLimit(Object.keys(newData[0]).length);
+    setSelectedRows(new Set(newData.map((_, i) => i)));
+    setFile({ name: `Synthetic_Data_${genConfig.mode}_${genConfig.rows}.csv` });
+    setCleaned(false);
+    setShowGenerator(false);
+  };
+
   const resetState = () => {
     setFile(null);
     setRawData([]);
@@ -60,6 +110,7 @@ export default function App() {
     setProgress(0);
     setCleaned(false);
     setSelectedModel(null);
+    setShowGenerator(false);
   };
 
   const toggleRow = (index) => {
@@ -242,23 +293,89 @@ export default function App() {
         </header>
 
         {rawData.length === 0 ? (
-          <div 
-            onClick={() => fileInputRef.current.click()}
-            className="group relative cursor-pointer"
-          >
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000" />
-            <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-2xl p-12 transition-all hover:border-white/40 bg-white/5">
-              <Upload className="w-12 h-12 text-white/40 mb-4 group-hover:scale-110 transition-transform" />
-              <p className="text-lg text-white/80 font-medium">Drop your CSV here</p>
-              <p className="text-sm text-white/30 mt-1">or click to browse</p>
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept=".csv"
-                className="hidden" 
-              />
+          <div className="space-y-4">
+            <div 
+              onClick={() => fileInputRef.current.click()}
+              className="group relative cursor-pointer"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000" />
+              <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-2xl p-12 transition-all hover:border-white/40 bg-white/5">
+                <Upload className="w-12 h-12 text-white/40 mb-4 group-hover:scale-110 transition-transform" />
+                <p className="text-lg text-white/80 font-medium">Drop your CSV here</p>
+                <p className="text-sm text-white/30 mt-1">or click to browse</p>
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept=".csv"
+                  className="hidden" 
+                />
+              </div>
             </div>
+
+            <div className="flex justify-center">
+              <button 
+                onClick={() => setShowGenerator(!showGenerator)}
+                className="text-xs text-emerald-400/70 hover:text-emerald-300 flex items-center gap-2 transition-colors uppercase tracking-widest font-bold"
+              >
+                <Wand2 className="w-3 h-3" />
+                Generate Synthetic Data
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {showGenerator && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-bold uppercase tracking-widest text-white/70">Dataset Size</label>
+                        <span className="text-emerald-400 font-mono text-sm">{genConfig.rows} Rows</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="100" 
+                        max="5000" 
+                        step="100"
+                        value={genConfig.rows}
+                        onChange={(e) => setGenConfig({ ...genConfig, rows: parseInt(e.target.value) })}
+                        className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="text-xs font-bold uppercase tracking-widest text-white/70">Spending Trend</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {['random', 'ascending', 'descending'].map((mode) => (
+                          <button
+                            key={mode}
+                            onClick={() => setGenConfig({ ...genConfig, mode })}
+                            className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-all ${genConfig.mode === mode ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                          >
+                            {mode === 'random' && <Shuffle className="w-4 h-4" />}
+                            {mode === 'ascending' && <TrendingUp className="w-4 h-4" />}
+                            {mode === 'descending' && <TrendingDown className="w-4 h-4" />}
+                            <span className="text-[10px] uppercase font-bold">{mode}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={generateData}
+                      className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-lg transition-colors shadow-lg shadow-emerald-500/20"
+                    >
+                      Generate Data
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ) : (
           <div className="space-y-6">
