@@ -24,27 +24,27 @@ These are the essential tasks required to get the primary "Train Model" and "Run
   - Ensure realistic categories and date formatting.
 
 ### 2. Backend API Setup
-- [ ] **Initialize a Python Backend:** Choose a lightweight framework.
-  - **Suggestion:** `Flask` or `FastAPI`. FastAPI is more modern and often faster.
-- [ ] **Create API Endpoints:** Design the routes the frontend will call.
-  - `GET /models`: List all available trained models from the `models/` directory.
-  - `DELETE /models/{id}`: Delete a specific trained model file.
-  - `POST /train`: Receive cleaned CSV data and train a new model.
-  - `POST /predict`: Receive a new CSV and a model ID to generate predictions.
-- [ ] **Add Dependencies:** Create a `requirements.txt` file for Python packages (`flask`, `scikit-learn`, `pandas`, `numpy`, `joblib`).
+- [x] **Initialize a Python Backend:**
+  - Set up a Flask server with CORS enabled.
+  - Create `main.py` as the entry point.
+- [x] **Create API Endpoints:**
+  - `GET /models`: Lists all available trained models from the `models/` directory.
+  - `DELETE /models/{id}`: Deletes a specific trained model file.
+  - `POST /train`: Receives cleaned CSV data, trains a Random Forest model, and saves it.
+  - `POST /predict`: Receives a new CSV and a model ID to generate predictions.
+- [x] **Add Dependencies:** Created `requirements.txt` with `flask`, `scikit-learn`, `pandas`, `numpy`, `joblib`.
 
 ### 3. Machine Learning Model Implementation
-- [ ] **Model Storage Structure:**
-  - Create a `models/` directory to store trained model files (`.pkl` or `.joblib`).
-  - Implement logic to save metadata (accuracy, date, type) alongside the model file.
-- [ ] **Training Logic:**
-  - Implement `RandomForest` training pipeline.
-  - Handle data preprocessing (One-Hot Encoding, missing values) automatically.
-  - Calculate and save feature importance for "Fancy Insights".
-- [ ] **Prediction Logic:**
-  - Load the selected model from disk.
-  - Run predictions on the new uploaded dataset.
-  - Return predictions + feature importance data to the frontend.
+- [x] **Model Storage Structure:**
+  - Created a `models/` directory to store trained model files (`.pkl`).
+  - Implemented logic to save metadata (accuracy, date, type) alongside the model file.
+- [x] **Training Logic:**
+  - Implemented `RandomForest` training pipeline.
+  - Handles data preprocessing (One-Hot Encoding, missing values) automatically.
+- [x] **Prediction Logic:**
+  - Loads the selected model from disk.
+  - Runs predictions on the new uploaded dataset.
+  - Returns predictions to the frontend.
 
 ### 4. Frontend Integration (Connecting UI to Backend)
 - [ ] **Dynamic Model List:**

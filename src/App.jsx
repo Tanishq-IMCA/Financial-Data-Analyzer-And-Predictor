@@ -56,34 +56,59 @@ export default function App() {
 
   const generateData = () => {
     const categories = [
-      { name: 'Food & Dining', min: 10, max: 150 },
-      { name: 'Transportation', min: 5, max: 50 },
-      { name: 'Shopping', min: 20, max: 500 },
-      { name: 'Entertainment', min: 15, max: 200 },
-      { name: 'Utilities', min: 50, max: 300 },
-      { name: 'Rent/Mortgage', min: 800, max: 2500 },
-      { name: 'Healthcare', min: 30, max: 1000 }
+      { name: 'Food & Dining', min: 10, max: 150, weight: 0.3 },
+      { name: 'Transportation', min: 5, max: 50, weight: 0.15 },
+      { name: 'Shopping', min: 20, max: 500, weight: 0.2 },
+      { name: 'Entertainment', min: 15, max: 200, weight: 0.1 },
+      { name: 'Utilities', min: 50, max: 300, weight: 0.05 },
+      { name: 'Rent/Mortgage', min: 800, max: 2500, weight: 0.05 }, // Less frequent
+      { name: 'Healthcare', min: 30, max: 1000, weight: 0.05 },
+      { name: 'Groceries', min: 30, max: 250, weight: 0.1 }
     ];
 
     const newData = [];
     const startDate = new Date('2023-01-01');
+    let currentDate = new Date(startDate);
+    let transactionsToday = 0;
+    let maxTransactionsPerDay = Math.floor(Math.random() * 4) + 1; // 1 to 4 transactions per day initially
 
     for (let i = 0; i < genConfig.rows; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
+      // Date Logic: Advance date only after max transactions for the day are reached
+      if (transactionsToday >= maxTransactionsPerDay) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        transactionsToday = 0;
+        maxTransactionsPerDay = Math.floor(Math.random() * 4) + 1; // New random limit for the next day
+      }
+      transactionsToday++;
+
+      // Weighted Category Selection
+      const rand = Math.random();
+      let cumulativeWeight = 0;
+      let category = categories[0];
+      for (const cat of categories) {
+        cumulativeWeight += cat.weight;
+        if (rand <= cumulativeWeight) {
+          category = cat;
+          break;
+        }
+      }
       
-      const category = categories[Math.floor(Math.random() * categories.length)];
       let amount = Math.floor(Math.random() * (category.max - category.min + 1)) + category.min;
 
       // Apply Trend Logic
+      const progress = i / genConfig.rows;
       if (genConfig.mode === 'ascending') {
-        amount = amount * (1 + (i / genConfig.rows)); // Increases up to 2x by end
+        // Ramp up: Increase amount AND slightly increase frequency of high-cost items
+        amount = amount * (1 + progress * 1.5); 
+        if (progress > 0.7 && Math.random() > 0.7) amount *= 1.5; // Occasional splurges near end
       } else if (genConfig.mode === 'descending') {
-        amount = amount * (2 - (i / genConfig.rows)); // Starts 2x, decreases to 1x
+        // Ramp down: Decrease amount
+        amount = amount * (2.5 - progress * 2); 
+        if (amount < category.min) amount = category.min; // Don't go below min
       }
 
       newData.push({
-        Date: date.toISOString().split('T')[0],
+        Date: currentDate.toISOString().split('T')[0],
         Category: category.name,
         Amount: amount.toFixed(2),
         Payment_Method: Math.random() > 0.6 ? 'Credit Card' : 'Debit Card',
@@ -340,7 +365,7 @@ export default function App() {
                       <input 
                         type="range" 
                         min="100" 
-                        max="5000" 
+                        max="10000"
                         step="100"
                         value={genConfig.rows}
                         onChange={(e) => setGenConfig({ ...genConfig, rows: parseInt(e.target.value) })}
