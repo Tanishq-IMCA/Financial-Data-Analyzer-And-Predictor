@@ -26,6 +26,40 @@ Flux Predictive is a next-generation predictive modeling suite designed for the 
 - **Assets**: Lucide React
 - **Data Core**: PapaParse
 
+## Setup and Installation
+
+To get started with Flux Predictive, follow these steps:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd Financial-Data-Analyzer-And-Predictor
+    ```
+
+2.  **Install dependencies:**
+    This project uses `npm` to manage dependencies. Run the following command to install them:
+    ```bash
+    npm install
+    ```
+
+3.  **Run the development server:**
+    To start the local development server, run:
+    ```bash
+    npm run dev
+    ```
+    The application will be available at `http://localhost:5000`.
+
+## Dependencies
+
+This project relies on several key libraries:
+
+*   **React**: A JavaScript library for building user interfaces.
+*   **Vite**: A fast build tool and development server.
+*   **Tailwind CSS**: A utility-first CSS framework for rapid UI development.
+*   **Framer Motion**: A library for creating animations.
+*   **PapaParse**: A powerful CSV parser for the browser.
+*   **Lucide React**: A library of simply beautiful icons.
+
 ## Team & Credits
 - **Design & Architecture**: Tanishq
 - **Core Contributor**: Sanika Sadre
