@@ -18,6 +18,10 @@ These are the essential tasks required to get the primary "Train Model" and "Run
   - Implement "Glassmorphism" cards for each model with details (Type, Date, Accuracy).
   - Add "Delete" functionality with confirmation logic.
   - Add "Run Model" workflow to upload new data for prediction.
+- [x] **Synthetic Data Generator:**
+  - Add a "Generate Synthetic Data" feature to the Atlas Data Optimizer.
+  - Implement logic for Random, Ascending, and Descending spending trends.
+  - Ensure realistic categories and date formatting.
 
 ### 2. Backend API Setup
 - [ ] **Initialize a Python Backend:** Choose a lightweight framework.
