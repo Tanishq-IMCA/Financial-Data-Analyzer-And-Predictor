@@ -8,40 +8,52 @@ This document outlines the development plan for completing the core features of 
 
 These are the essential tasks required to get the primary "Train Model" and "Run Models" features working.
 
-### 1. Backend API Setup
+### 1. Frontend Development (UI/UX)
+- [x] **"Train Model" Page UI:**
+  - Create a dedicated view for model training configuration.
+  - Implement file upload and model parameter selection (Model Type, Target Column).
+  - Add visual feedback for training status.
+- [x] **"Run Models" Page UI:**
+  - Create a dashboard to list available trained models.
+  - Implement "Glassmorphism" cards for each model with details (Type, Date, Accuracy).
+  - Add "Delete" functionality with confirmation logic.
+  - Add "Run Model" workflow to upload new data for prediction.
+
+### 2. Backend API Setup
 - [ ] **Initialize a Python Backend:** Choose a lightweight framework.
   - **Suggestion:** `Flask` or `FastAPI`. FastAPI is more modern and often faster.
 - [ ] **Create API Endpoints:** Design the routes the frontend will call.
-  - `/train`: To receive cleaned data and train the model.
-  - `/predict`: To receive new data and return predictions from the trained model.
-  - `/status`: To check the status of a training job.
-- [ ] **Add Dependencies:** Create a `requirements.txt` file for Python packages (`flask`, `scikit-learn`, `pandas`, `numpy`).
+  - `GET /models`: List all available trained models from the `models/` directory.
+  - `DELETE /models/{id}`: Delete a specific trained model file.
+  - `POST /train`: Receive cleaned CSV data and train a new model.
+  - `POST /predict`: Receive a new CSV and a model ID to generate predictions.
+- [ ] **Add Dependencies:** Create a `requirements.txt` file for Python packages (`flask`, `scikit-learn`, `pandas`, `numpy`, `joblib`).
 
-### 2. Machine Learning Model Implementation
-- [ ] **Choose and Implement a Model:**
-  - **Primary Choice:** `RandomForest` from `scikit-learn`. It handles both classification (purchase probability) and regression (future spending).
-- [ ] **Data Preprocessing:**
-  - Handle categorical data (e.g., text columns) using One-Hot Encoding.
-  - Handle missing values.
-- [ ] **Model Training Logic:**
-  - Implement the function that fits the model to the training data sent from the frontend.
-  - Save the trained model to a file (e.g., using `joblib` or `pickle`) so it can be reused without retraining.
+### 3. Machine Learning Model Implementation
+- [ ] **Model Storage Structure:**
+  - Create a `models/` directory to store trained model files (`.pkl` or `.joblib`).
+  - Implement logic to save metadata (accuracy, date, type) alongside the model file.
+- [ ] **Training Logic:**
+  - Implement `RandomForest` training pipeline.
+  - Handle data preprocessing (One-Hot Encoding, missing values) automatically.
+  - Calculate and save feature importance for "Fancy Insights".
 - [ ] **Prediction Logic:**
-  - Implement the function that loads the saved model and uses it to make predictions on new data.
+  - Load the selected model from disk.
+  - Run predictions on the new uploaded dataset.
+  - Return predictions + feature importance data to the frontend.
 
-### 3. Frontend Integration
-- [ ] **Connect "Train Model" Page:**
-  - Create a new view/component for the training interface.
-  - Add a file upload similar to the "Atlas Optimizer".
-  - Add a button that sends the cleaned data to the `/train` backend endpoint.
-  - Show training progress and completion status from the backend.
-- [ ] **Connect "Run Models" Page:**
-  - Create a new view/component for the prediction interface.
-  - Add a file upload for the data to be predicted on.
-  - Add a button to send the data to the `/predict` backend endpoint.
-- [ ] **Display Results:**
-  - Create components to visualize the predictions (e.g., a table with a new "Prediction" column).
-  - **(Crucial for Analysis):** If using Random Forest, create a chart (e.g., a bar chart) to display the "Feature Importance" returned from the model. This shows *why* the model made its predictions.
+### 4. Frontend Integration (Connecting UI to Backend)
+- [ ] **Dynamic Model List:**
+  - Fetch the list of models from `GET /models` instead of using dummy data.
+  - Connect the "Delete" button to the `DELETE /models/{id}` endpoint.
+- [ ] **Connect "Train" Button:**
+  - Send the uploaded CSV to `POST /train`.
+  - Display the returned training accuracy and success message.
+- [ ] **Connect "Run Prediction" Button:**
+  - Send the uploaded CSV and selected model ID to `POST /predict`.
+  - **Display Results & Insights:**
+    - Show the prediction results in a table.
+    - Render charts (e.g., Bar Chart for Feature Importance) using the data returned from the backend.
 
 ---
 
